@@ -49,7 +49,7 @@ impl IntoResponse for AppError {
             "error": {
                 "code": self.error_code(),
                 "message": self.to_string(),
-                "trace_id": "req-" // TODO: добавить трейсинг
+                "trace_id": "req-" 
             }
         });
         
