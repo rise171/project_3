@@ -50,7 +50,7 @@ impl IntoResponse for AppError {
             "error": {
                 "code": self.error_code(),
                 "message": self.to_string(),
-                "trace_id": ""  // Можно добавить позже
+                "trace_id": ""
             }
         });
         
