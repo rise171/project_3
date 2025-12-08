@@ -5,14 +5,13 @@ pub type DbPool = PgPool;
 
 pub async fn create_pool(database_url: &str) -> Result<DbPool, AppError> {
     PgPoolOptions::new()
-        .max_connections(5)
+        .max_connections(10)
         .connect(database_url)
         .await
         .map_err(AppError::from)
 }
 
 pub async fn init_db(pool: &DbPool) -> Result<(), AppError> {
-    // ISS
     sqlx::query(
         "CREATE TABLE IF NOT EXISTS iss_fetch_log(
             id BIGSERIAL PRIMARY KEY,
@@ -22,7 +21,6 @@ pub async fn init_db(pool: &DbPool) -> Result<(), AppError> {
         )"
     ).execute(pool).await?;
 
-    // OSDR
     sqlx::query(
         "CREATE TABLE IF NOT EXISTS osdr_items(
             id BIGSERIAL PRIMARY KEY,
@@ -34,13 +32,12 @@ pub async fn init_db(pool: &DbPool) -> Result<(), AppError> {
             raw JSONB NOT NULL
         )"
     ).execute(pool).await?;
-    
+
     sqlx::query(
         "CREATE UNIQUE INDEX IF NOT EXISTS ux_osdr_dataset_id
-         ON osdr_items(dataset_id) WHERE dataset_id IS NOT NULL"
+         ON osdr_items(dataset_id)"
     ).execute(pool).await?;
 
-    // Универсальный кэш
     sqlx::query(
         "CREATE TABLE IF NOT EXISTS space_cache(
             id BIGSERIAL PRIMARY KEY,
@@ -48,11 +45,6 @@ pub async fn init_db(pool: &DbPool) -> Result<(), AppError> {
             fetched_at TIMESTAMPTZ NOT NULL DEFAULT now(),
             payload JSONB NOT NULL
         )"
-    ).execute(pool).await?;
-    
-    sqlx::query(
-        "CREATE INDEX IF NOT EXISTS ix_space_cache_source 
-         ON space_cache(source, fetched_at DESC)"
     ).execute(pool).await?;
 
     Ok(())
