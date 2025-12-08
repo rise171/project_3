@@ -75,7 +75,12 @@ impl OsdrService {
             .timeout(Duration::from_secs(30))
             .build()?;
         
-        let response = client.get(&self.nasa_url).send().await?;
+        let response = client.get(url).send().await?;
+        if !response.status().is_success() {
+            return Err(AppError::ExternalApi(format!("HTTP {} while fetching ISS", response.status())));
+        }
+        let json: Value = response.json().await?;
+
         
         if !response.status().is_success() {
             return Err(AppError::ExternalApi(
