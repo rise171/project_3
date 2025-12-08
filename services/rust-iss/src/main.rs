@@ -101,10 +101,17 @@ async fn fetch_iss_background(pool: &sqlx::PgPool, url: &str) -> Result<(), AppE
     let client = reqwest::Client::builder()
         .timeout(Duration::from_secs(20))
         .build()?;
-    
+
     let response = client.get(url).send().await?;
+    let status = response.status();
+
+    if !status.is_success() {
+        tracing::warn!("ISS fetch failed: {}", status);
+        return Ok(());
+    }
+
     let json: serde_json::Value = response.json().await?;
-    
+
     sqlx::query(
         "INSERT INTO iss_fetch_log (source_url, payload) VALUES ($1, $2)"
     )
@@ -112,6 +119,6 @@ async fn fetch_iss_background(pool: &sqlx::PgPool, url: &str) -> Result<(), AppE
     .bind(json)
     .execute(pool)
     .await?;
-    
+
     Ok(())
 }
