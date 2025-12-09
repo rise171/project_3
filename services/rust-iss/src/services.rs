@@ -90,7 +90,6 @@ impl OsdrService {
         
         let json: Value = response.json().await?;
         
-        // Упрощённая логика парсинга (как в оригинале)
         let items = if let Some(array) = json.as_array() {
             array.clone()
         } else if let Some(array) = json.get("items").and_then(|x| x.as_array()) {

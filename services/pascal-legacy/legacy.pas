@@ -76,6 +76,7 @@ begin
 
     if ImportToPg(fullpath) <> 0 then
       WriteLn('[legacy] import failed: ', fullpath)
+      WriteLn('[legacy] COPY into postgres...')
     else
       WriteLn('[legacy] imported: ', fullpath);
 

@@ -1,10 +1,10 @@
+FROM debian:12-slim AS build
+RUN apt-get update && apt-get install -y fp-compiler
+WORKDIR /src
+COPY legacy.pas .
+RUN fpc -O2 legacy.pas
+
 FROM debian:12-slim
-
-RUN apt-get update && apt-get install -y --no-install-recommends     fp-compiler postgresql-client ca-certificates     && rm -rf /var/lib/apt/lists/*
-
 WORKDIR /opt/legacy
-COPY legacy.pas ./
-COPY run.sh /usr/local/bin/run_legacy.sh
-RUN chmod +x /usr/local/bin/run_legacy.sh
-
-CMD ["/usr/local/bin/run_legacy.sh"]
+COPY --from=build /src/legacy /usr/local/bin/legacy
+CMD ["legacy"]
